@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaTech — Cửa hàng công nghệ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#070B14",
+              panel: "#101826",
+              line: "#1F2A3D",
+              neon: "#22D3EE",
+              gold: "#FBBF24",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background:
+          radial-gradient(
+            1200px 600px at 10% -10%,
+            #123047 0%,
+            transparent 45%
+          ),
+          #070b14;
+      }
+      .glass {
+        background: rgba(16, 24, 38, 0.82);
+        backdrop-filter: blur(16px);
+      }
+      .card-hover:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(34, 211, 238, 0.12);
+      }
+      .hide-scroll::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="text-slate-200 antialiased">
+    <!-- Top bar -->
+    <div class="bg-black/40 text-xs text-slate-400 border-b border-line">
+      <div class="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between">
+        <p>Giao hàng toàn quốc • Bảo hành chính hãng 12–24 tháng</p>
+        <p class="hidden sm:block">
+          Hotline:
+          <span class="text-neon">1900 6868</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 glass border-b border-line">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
+        <button class="md:hidden text-2xl" onclick="toggleMobile()">☰</button>
+        <a
+          href="#"
+          onclick="
+            showPage('home');
+            return false;
+          "
+          class="text-xl font-black tracking-tight"
+        >
+          <span class="text-neon">NOVA</span>
+          <span class="text-white">TECH</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium ml-6">
+          <button
+            onclick="showPage('home')"
+            class="cursor-pointer hover:text-cyan-400 transition"
+          >
+            Trang chủ
+          </button>
+          <button
+            onclick="showPage('shop')"
+            class="cursor-pointer hover:text-cyan-400 transition"
+          >
+            Sản phẩm
+          </button>
+          <button
+            onclick="showPage('about')"
+            class="cursor-pointer hover:text-cyan-400 transition"
+          >
+            Giới thiệu
+          </button>
+          <button
+            onclick="showPage('contact')"
+            class="cursor-pointer hover:text-cyan-400 transition"
+          >
+            Liên hệ
+          </button>
+        </nav>
+
+        <div class="flex-1 hidden md:block">
+          <div class="relative max-w-md mx-auto">
+            <input
+              id="searchInput"
+              onkeyup="handleSearch()"
+              placeholder="Tìm MacBook, iPhone, tai nghe..."
+              class="w-full bg-ink border border-line rounded-full px-4 py-2 text-sm outline-none focus:border-neon"
+            />
+          </div>
+        </div>
+
+        <div class="ml-auto flex items-center gap-2">
+          <button
+            onclick="openWishlist()"
+            class="relative p-2 hover:text-neon"
+            title="Yêu thích"
+          >
+            ♡
+            <span
+              id="wishBadge"
+              class="hidden absolute -top-1 -right-1 bg-gold text-black text-[10px] font-bold h-4 w-4 rounded-full grid place-items-center"
+            >
+              0
+            </span>
+          </button>
+
+          <div id="authButtons" class="hidden sm:flex items-center gap-2">
+            <button
+              onclick="openLoginModal()"
+              class="cursor-pointer text-sm px-4 py-1.5 rounded-full border border-slate-500 hover:border-cyan-400 hover:text-cyan-400 transition font-medium"
+            >
+              Đăng nhập
+            </button>
+            <button
+              onclick="openRegisterModal()"
+              class="cursor-pointer text-sm px-4 py-1.5 rounded-full bg-cyan-400 text-slate-900 font-bold hover:bg-cyan-300 transition"
+            >
+              Đăng ký
+            </button>
+          </div>
+
+          <div id="userInfo" class="hidden items-center gap-2">
+            <button
+              onclick="toggleUserMenu()"
+              class="cursor-pointer text-sm px-3 py-1.5 border border-slate-600 rounded-full hover:border-cyan-400 transition font-medium"
+            >
+              <span id="userName">User</span>
+              ▾
+            </button>
+            <div
+              id="userMenu"
+              class="hidden absolute right-16 top-20 glass border border-line rounded-xl w-48 overflow-hidden"
+            >
+              <button
+                onclick="
+                  showPage('orders');
+                  toggleUserMenu();
+                "
+                class="cursor-pointer block w-full text-left px-4 py-2.5 hover:bg-slate-800 text-sm"
+              >
+                Đơn hàng của tôi
+              </button>
+              <button
+                onclick="logout()"
+                class="cursor-pointer block w-full text-left px-4 py-2.5 hover:bg-slate-800 text-sm text-red-400"
+              >
+                Đăng xuất
+              </button>x`
+            </div>
+          </div>
+
+          <button onclick="openCart()" class="relative p-2 hover:text-neon">
+            🛒
+            <span
+              id="cartBadge"
+              class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full grid place-items-center"
+            >
+              0
+            </span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile nav -->
+    <div
+      id="mobileNav"
+      class="hidden md:hidden border-b border-line bg-panel px-4 py-3 space-y-2"
+    >
+      <input
+        id="searchInputMobile"
+        onkeyup="syncSearch(this.value)"
+        placeholder="Tìm sản phẩm..."
+        class="w-full bg-ink border border-line rounded-full px-4 py-2 text-sm mb-2"
+      />
+      <button onclick="showPage('home')" class="block">Trang chủ</button>
+      <button onclick="showPage('shop')" class="block">Sản phẩm</button>
+      <button onclick="showPage('about')" class="block">Giới thiệu</button>
+      <button onclick="showPage('contact')" class="block">Liên hệ</button>
+    </div>
+
+    <!-- HOME -->
+    <section id="page-home">
+      <div
+        class="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-2 gap-8 items-center"
+      >
+        <div>
+          <p
+            class="text-neon text-sm font-semibold tracking-widest uppercase mb-3"
+          >
+            New season 2026
+          </p>
+          <h1 class="text-4xl md:text-6xl font-black leading-tight text-white">
+            Công nghệ đỉnh.
+            <br />
+            Giá thật minh bạch.
+          </h1>
+          <p class="mt-4 text-slate-400 max-w-lg">
+            Laptop, smartphone và phụ kiện chính hãng. Đổi trả 7 ngày, hỗ trợ kỹ
+            thuật 1-1.
+          </p>
+          <div class="mt-6 flex gap-3">
+            <button
+              onclick="showPage('shop')"
+              class="px-6 py-3 bg-neon text-ink font-bold rounded-full"
+            >
+              Mua ngay
+            </button>
+            <button
+              onclick="filterCategory('Laptop')"
+              class="px-6 py-3 border border-line rounded-full hover:border-neon"
+            >
+              Xem Laptop
+            </button>
+          </div>
+        </div>
+        <div
+          class="rounded-3xl border border-line overflow-hidden bg-gradient-to-br from-cyan-500/20 to-indigo-900/40 p-8 min-h-[280px] flex items-end"
+        >
+          <div>
+            <p class="text-gold text-sm font-semibold">Ưu đãi tuần này</p>
+            <p class="text-3xl font-black text-white mt-1">Giảm đến 15%</p>
+            <p class="text-slate-300 mt-2">
+              MacBook • Galaxy S24 • AirPods Pro
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 pb-8"
+      >
+        <div class="border border-line rounded-2xl p-4 bg-panel/60">
+          🚚 Giao nhanh 2h nội thành
+        </div>
+        <div class="border border-line rounded-2xl p-4 bg-panel/60">
+          🛡️ Bảo hành chính hãng
+        </div>
+        <div class="border border-line rounded-2xl p-4 bg-panel/60">
+          💳 Trả góp 0%
+        </div>
+        <div class="border border-line rounded-2xl p-4 bg-panel/60">
+          ↩ Đổi trả 7 ngày
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOP / PRODUCTS -->
+    <section id="page-shop" class="max-w-7xl mx-auto px-4 pb-16">
+      <div
+        class="flex flex-col md:flex-row mt-2 md:items-center justify-between gap-4 mb-6"
+      >
+        <h2 class="text-2xl font-bold text-white">Sản phẩm nổi bật</h2>
+        <div class="flex flex-wrap gap-2 items-center">
+          <div id="categoryFilter" class="flex flex-wrap gap-2"></div>
+          <select
+            id="sortSelect"
+            onchange="applySort()"
+            class="bg-panel border border-line rounded-full px-3 py-2 text-sm"
+          >
+            <option value="new">Mới nhất</option>
+            <option value="priceAsc">Giá tăng dần</option>
+            <option value="priceDesc">Giá giảm dần</option>
+            <option value="name">Tên A-Z</option>
+          </select>
+        </div>
+      </div>
+      <div
+        id="productGrid"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      ></div>
+      <div id="loading" class="text-center py-12 text-slate-400">
+        Đang tải sản phẩm...
+      </div>
+      <div id="emptyState" class="hidden text-center py-12 text-slate-400">
+        Không tìm thấy sản phẩm.
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="page-about" class="hidden max-w-4xl mx-auto px-4 py-16">
+      <h2 class="text-3xl font-black text-white mb-4">Về NovaTech</h2>
+      <p class="text-slate-400 leading-relaxed">
+        NovaTech là cửa hàng công nghệ tập trung vào trải nghiệm mua sắm rõ
+        ràng: giá niêm yết, bảo hành minh bạch và hỗ trợ kỹ thuật sau bán. Chúng
+        tôi chọn lọc laptop, smartphone và phụ kiện từ các thương hiệu uy tín.
+      </p>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="page-contact" class="hidden max-w-4xl mx-auto px-4 py-16">
+      <h2 class="text-3xl font-black text-white mb-6">Liên hệ</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="space-y-3 text-slate-300">
+          <p>📍 123 Nguyễn Huệ, Q.1, TP.HCM</p>
+          <p>☎️ 1900 6868</p>
+          <p>✉️ hello@novatech.vn</p>
+          <p>🕒 8:30 – 21:30 hàng ngày</p>
+        </div>
+        <form onsubmit="sendContact(event)" class="space-y-3">
+          <input
+            id="ctName"
+            required
+            placeholder="Họ tên"
+            class="w-full bg-panel border border-line rounded-xl px-4 py-2"
+          />
+          <input
+            id="ctEmail"
+            required
+            type="email"
+            placeholder="Email"
+            class="w-full bg-panel border border-line rounded-xl px-4 py-2"
+          />
+          <textarea
+            id="ctMsg"
+            required
+            rows="4"
+            placeholder="Nội dung"
+            class="w-full bg-panel border border-line rounded-xl px-4 py-2"
+          ></textarea>
+          <button class="px-5 py-2 bg-neon text-ink font-bold rounded-full">
+            Gửi liên hệ
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- MY ORDERS -->
+    <section id="page-orders" class="hidden max-w-4xl mx-auto px-4 py-16">
+      <h2 class="text-3xl font-black text-white mb-6">Đơn hàng của tôi</h2>
+      <div id="ordersList" class="space-y-4"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-line mt-8 bg-black/30">
+      <div
+        class="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-8 text-sm text-slate-400"
+      >
+        <div>
+          <p class="text-white font-bold mb-2">NOVATECH</p>
+          <p>Cửa hàng công nghệ chính hãng. Mua sắm an tâm, hỗ trợ tận nơi.</p>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-2">Hỗ trợ</p>
+          <p>Chính sách bảo hành</p>
+          <p>Đổi trả 7 ngày</p>
+          <p>Hướng dẫn thanh toán</p>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-2">Danh mục</p>
+          <p>Laptop</p>
+          <p>Smartphone</p>
+          <p>Phụ kiện</p>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-2">Nhận ưu đãi</p>
+          <div class="flex gap-2 mt-2">
+            <input
+              id="newsEmail"
+              placeholder="Email của bạn"
+              class="flex-1 bg-panel border border-line rounded-full px-3 py-2"
+            />
+            <button
+              onclick="subscribeNews()"
+              class="px-4 bg-gold text-white rounded-full font-semibold"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Product detail modal -->
+    <div
+      id="detailModal"
+      class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4"
+    >
+      <div
+        class="bg-panel border border-line rounded-2xl max-w-2xl w-full p-6 relative"
+      >
+        <button onclick="closeDetail()" class="absolute right-4 top-3 text-2xl">
+          ×
+        </button>
+        <div id="detailContent"></div>
+      </div>
+    </div>
+
+    <!-- Cart -->
+    <div
+      id="cartOverlay"
+      class="fixed inset-0 bg-black/60 z-50 hidden"
+      onclick="closeCart()"
+    ></div>
+    <div
+      id="cartPanel"
+      class="fixed top-0 right-0 h-full w-full max-w-md bg-panel border-l border-line z-50 translate-x-full transition-transform flex flex-col"
+    >
+      <div class="flex justify-between items-center p-4 border-b border-line">
+        <h3 class="font-bold text-white">Giỏ hàng</h3>
+        <button onclick="closeCart()" class="text-2xl">×</button>
+      </div>
+      <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+      <div class="p-4 border-t border-line">
+        <div class="flex justify-between mb-3 font-semibold">
+          <span>Tổng</span>
+          <span id="cartTotal">0 ₫</span>
+        </div>
+        <button
+          onclick="showCheckoutForm()"
+          class="w-full py-3 bg-black border border-sky-600 text-ink font-bold rounded-xl"
+        >
+          Thanh toán
+        </button>
+      </div>
+    </div>
+
+    <!-- Wishlist -->
+    <div
+      id="wishModal"
+      class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4"
+    >
+      <div class="bg-panel border border-line rounded-2xl max-w-lg w-full p-6">
+        <div class="flex justify-between mb-4">
+          <h3 class="font-bold text-white">Yêu thích</h3>
+          <button onclick="closeWishlist()">×</button>
+        </div>
+        <div id="wishList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- Checkout -->
+    <div
+      id="checkoutModal"
+      class="fixed inset-0 bg-black/70 z-[60] hidden items-center justify-center p-4"
+    >
+      <div class="bg-panel border border-line rounded-2xl w-full max-w-md p-6">
+        <h3 class="text-xl font-bold text-white mb-4">Thông tin giao hàng</h3>
+        <form onsubmit="submitOrder(event)" class="space-y-3">
+          <input
+            id="customerName"
+            required
+            placeholder="Họ tên"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <input
+            id="customerPhone"
+            required
+            placeholder="Số điện thoại"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <textarea
+            id="customerAddress"
+            required
+            placeholder="Địa chỉ"
+            rows="3"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          ></textarea>
+          <div class="flex gap-3 pt-2">
+            <button
+              type="button"
+              onclick="closeCheckout()"
+              class="flex-1 border border-line rounded-xl py-2"
+            >
+              Huỷ
+            </button>
+            <button class="flex-1 bg-neon text-ink font-bold rounded-xl py-2">
+              Đặt hàng
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div
+      id="loginModal"
+      class="fixed inset-0 bg-black/70 z-[70] hidden items-center justify-center p-4"
+    >
+      <div class="bg-black border border-line rounded-2xl w-full max-w-md p-6">
+        <div class="flex justify-between mb-4">
+          <h3 class="text-xl font-bold text-white">Đăng nhập</h3>
+          <button onclick="closeLoginModal()">×</button>
+        </div>
+        <form onsubmit="handleLogin(event)" class="space-y-3">
+          <input
+            id="loginEmail"
+            type="email"
+            required
+            placeholder="Email"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <input
+            id="loginPassword"
+            type="password"
+            required
+            placeholder="Mật khẩu"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <button class="w-full bg-neon text-ink font-bold rounded-xl py-2.5">
+            Đăng nhập
+          </button>
+          <p class="text-center text-sm">
+            Chưa có tài khoản?
+            <button
+              type="button"
+              onclick="switchToRegister()"
+              class="text-neon"
+            >
+              Đăng ký
+            </button>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div
+      id="registerModal"
+      class="fixed inset-0 bg-black/70 z-[70] hidden items-center justify-center p-4"
+    >
+      <div class="bg-panel border border-line rounded-2xl w-full max-w-md p-6">
+        <div class="flex justify-between mb-4">
+          <h3 class="text-xl font-bold text-white">Đăng ký</h3>
+          <button onclick="closeRegisterModal()">×</button>
+        </div>
+        <form onsubmit="handleRegister(event)" class="space-y-3">
+          <input
+            id="regFullName"
+            required
+            placeholder="Họ tên"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <input
+            id="regEmail"
+            type="email"
+            required
+            placeholder="Email"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <input
+            id="regPhone"
+            placeholder="Số điện thoại"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <input
+            id="regPassword"
+            type="password"
+            required
+            minlength="6"
+            placeholder="Mật khẩu (≥6 ký tự)"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <input
+            id="regAddress"
+            placeholder="Địa chỉ"
+            class="w-full bg-ink border border-line rounded-xl px-3 py-2"
+          />
+          <button class="w-full bg-neon text-ink font-bold rounded-xl py-2.5">
+            Tạo tài khoản
+          </button>
+          <p class="text-center text-sm">
+            Đã có tài khoản?
+            <button type="button" onclick="switchToLogin()" class="text-neon">
+              Đăng nhập
+            </button>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <div
+      id="toast"
+      class="fixed bottom-6 right-6 bg-white text-ink px-5 py-3 rounded-xl shadow-lg translate-y-20 opacity-0 transition-all z-[80]"
+    ></div>
+    <script src="/js/app.js"></script>
+  </body>
+</html>
