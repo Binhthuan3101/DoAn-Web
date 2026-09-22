@@ -48,15 +48,18 @@ function showPage(name) {
 function updateAuthUI() {
   const authButtons = document.getElementById("authButtons");
   const userInfo = document.getElementById("userInfo");
+  const btnMobile = document.getElementById("btn-mobile");
   if (currentUser && token) {
     authButtons.className = "hidden sm:hidden gap-2";
     userInfo.classList.remove("hidden");
     userInfo.classList.add("flex");
+    btnMobile.classList.add("hidden");
     document.getElementById("userName").textContent = currentUser.fullName;
   } else {
-    authButtons.className="hidden sm:flex items-center gap-2";
+    authButtons.className = "hidden sm:flex items-center gap-2";
     userInfo.classList.add("hidden");
     userInfo.classList.remove("flex");
+    btnMobile.classList.remove("hidden");
   }
 }
 

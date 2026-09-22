@@ -165,7 +165,8 @@
                 class="cursor-pointer block w-full text-left px-4 py-2.5 hover:bg-slate-800 text-sm text-red-400"
               >
                 Đăng xuất
-              </button>x`
+              </button>
+              x`
             </div>
           </div>
 
@@ -197,6 +198,20 @@
       <button onclick="showPage('shop')" class="block">Sản phẩm</button>
       <button onclick="showPage('about')" class="block">Giới thiệu</button>
       <button onclick="showPage('contact')" class="block">Liên hệ</button>
+      <div id="btn-mobile" class="flex flex-col gap-3">
+        <button
+          onclick="openLoginModal()"
+          class="cursor-pointer text-sm block text-left rounded-full hover:text-cyan-400 transition font-medium"
+        >
+          Đăng nhập
+        </button>
+        <button
+          onclick="openRegisterModal()"
+          class="cursor-pointer text-sm block rounded-full text-left font-bold hover:bg-cyan-300 transition"
+        >
+          Đăng ký
+        </button>
+      </div>
     </div>
 
     <!-- HOME -->
