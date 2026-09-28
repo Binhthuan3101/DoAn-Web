@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin – NovaTech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-200 min-h-screen">
+    <header
+      class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center"
+    >
+      <h1 class="text-xl font-bold text-cyan-400">NovaTech Admin</h1>
+      <a
+        href="/"
+        class="text-sm text-slate-400 hover:text-white cursor-pointer"
+      >
+        ← Về cửa hàng
+      </a>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Quản lý sản phẩm</h2>
+        <button
+          onclick="openForm()"
+          class="cursor-pointer px-4 py-2 bg-cyan-400 text-slate-900 font-bold rounded-lg hover:bg-cyan-300"
+        >
+          + Thêm sản phẩm
+        </button>
+      </div>
+
+      <div class="overflow-x-auto border border-slate-800 rounded-xl">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-900 text-slate-400">
+            <tr>
+              <th class="text-left p-3">ID</th>
+              <th class="text-left p-3">Tên</th>
+              <th class="text-left p-3">Danh mục</th>
+              <th class="text-right p-3">Giá</th>
+              <th class="text-right p-3">Kho</th>
+              <th class="text-center p-3">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="productTable"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- Modal Form -->
+    <div
+      id="formModal"
+      class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6"
+      >
+        <h3 id="formTitle" class="text-xl font-bold mb-4">Thêm sản phẩm</h3>
+        <form onsubmit="saveProduct(event)" class="space-y-3">
+          <input type="hidden" id="productId" />
+          <input
+            id="ProductName"
+            required
+            placeholder="Tên sản phẩm"
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"
+          />
+          <textarea
+            id="Description"
+            placeholder="Mô tả"
+            rows="2"
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"
+          ></textarea>
+          <div class="grid grid-cols-2 gap-3">
+            <input
+              id="Price"
+              type="number"
+              required
+              min="0"
+              step="1000"
+              placeholder="Giá"
+              class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"
+            />
+            <input
+              id="Stock"
+              type="number"
+              required
+              min="0"
+              placeholder="Tồn kho"
+              class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"
+            />
+          </div>
+          <input
+            id="ImageURL"
+            placeholder="URL ảnh"
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"
+          />
+          <select
+            id="CategoryID"
+            required
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"
+          >
+            <option value="">-- Chọn danh mục --</option>
+          </select>
+          <div class="flex gap-3 pt-2">
+            <button
+              type="button"
+              onclick="closeForm()"
+              class="flex-1 border border-slate-600 rounded-lg py-2 cursor-pointer"
+            >
+              Huỷ
+            </button>
+            <button
+              type="submit"
+              class="flex-1 bg-cyan-400 text-slate-900 font-bold rounded-lg py-2 cursor-pointer"
+            >
+              Lưu
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      const token = localStorage.getItem("token");
+
+      if (!token || !user || user.role !== "admin") {
+        alert("Bạn không có quyền truy cập trang Admin");
+        window.location.href = "/";
+      }
+      const API = "/api";
+      let categories = [];
+
+      function formatPrice(n) {
+        return new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(n);
+      }
+
+      async function loadCategories() {
+        const res = await fetch(API + "/categories");
+        const json = await res.json();
+        categories = json.data || [];
+        const sel = document.getElementById("CategoryID");
+        sel.innerHTML =
+          '<option value="">-- Chọn danh mục --</option>' +
+          categories
+            .map(
+              (c) =>
+                `<option value="${c.CategoryID}">${c.CategoryName}</option>`,
+            )
+            .join("");
+      }
+
+      async function loadProducts() {
+        const res = await fetch(API + "/products");
+        const json = await res.json();
+        const list = json.data || [];
+        document.getElementById("productTable").innerHTML =
+          list
+            .map(
+              (p) => `
+        <tr class="border-t border-slate-800 hover:bg-slate-900/50">
+          <td class="p-3">${p.ProductID}</td>
+          <td class="p-3 font-medium text-white">${p.ProductName}</td>
+          <td class="p-3">${p.CategoryName || ""}</td>
+          <td class="p-3 text-right text-amber-400">${formatPrice(p.Price)}</td>
+          <td class="p-3 text-right">${p.Stock}</td>
+          <td class="p-3 text-center space-x-2">
+            <button onclick='editProduct(${JSON.stringify(p)})' class="cursor-pointer text-cyan-400 hover:underline">Sửa</button>
+            <button onclick="removeProduct(${p.ProductID})" class="cursor-pointer text-red-400 hover:underline">Xóa</button>
+          </td>
+        </tr>
+      `,
+            )
+            .join("") ||
+          '<tr><td colspan="6" class="p-6 text-center text-slate-500">Chưa có sản phẩm</td></tr>';
+      }
+
+      function openForm() {
+        document.getElementById("formTitle").textContent = "Thêm sản phẩm";
+        document.getElementById("productId").value = "";
+        document.getElementById("ProductName").value = "";
+        document.getElementById("Description").value = "";
+        document.getElementById("Price").value = "";
+        document.getElementById("Stock").value = "0";
+        document.getElementById("ImageURL").value = "";
+        document.getElementById("CategoryID").value = "";
+        const m = document.getElementById("formModal");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      }
+
+      function closeForm() {
+        const m = document.getElementById("formModal");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      }
+
+      function editProduct(p) {
+        document.getElementById("formTitle").textContent =
+          "Sửa sản phẩm #" + p.ProductID;
+        document.getElementById("productId").value = p.ProductID;
+        document.getElementById("ProductName").value = p.ProductName;
+        document.getElementById("Description").value = p.Description || "";
+        document.getElementById("Price").value = p.Price;
+        document.getElementById("Stock").value = p.Stock;
+        document.getElementById("ImageURL").value = p.ImageURL || "";
+        document.getElementById("CategoryID").value = p.CategoryID;
+        const m = document.getElementById("formModal");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      }
+
+      async function saveProduct(e) {
+        e.preventDefault();
+        const id = document.getElementById("productId").value;
+        const body = {
+          ProductName: document.getElementById("ProductName").value.trim(),
+          Description: document.getElementById("Description").value.trim(),
+          Price: Number(document.getElementById("Price").value),
+          Stock: Number(document.getElementById("Stock").value),
+          ImageURL: document.getElementById("ImageURL").value.trim(),
+          CategoryID: Number(document.getElementById("CategoryID").value),
+        };
+        const url = id ? `${API}/products/${id}` : `${API}/products`;
+        const method = id ? "PUT" : "POST";
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const json = await res.json();
+        if (!json.success) return alert(json.message);
+        closeForm();
+        loadProducts();
+        alert(json.message);
+      }
+
+      async function removeProduct(id) {
+        if (!confirm("Xác nhận xóa sản phẩm #" + id + "?")) return;
+        const res = await fetch(`${API}/products/${id}`, { method: "DELETE" });
+        const json = await res.json();
+        alert(json.message);
+        if (json.success) loadProducts();
+      }
+
+      loadCategories().then(loadProducts);
+    </script>
+  </body>
+</html>

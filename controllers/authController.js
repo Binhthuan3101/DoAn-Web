@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { getPool, sql } = require('../config/db');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { getPool, sql } = require("../config/db");
 
 const register = async (req, res) => {
   try {
@@ -10,7 +10,7 @@ const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         data: null,
-        message: 'Vui lòng nhập đầy đủ Họ tên, Email và Mật khẩu',
+        message: "Vui lòng nhập đầy đủ Họ tên, Email và Mật khẩu",
       });
     }
 
@@ -18,7 +18,7 @@ const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         data: null,
-        message: 'Mật khẩu phải có ít nhất 6 ký tự',
+        message: "Mật khẩu phải có ít nhất 6 ký tự",
       });
     }
 
@@ -27,14 +27,14 @@ const register = async (req, res) => {
     // Kiểm tra email đã tồn tại chưa
     const checkEmail = await pool
       .request()
-      .input('email', sql.NVarChar, email)
-      .query('SELECT UserID FROM Users WHERE Email = @email');
+      .input("email", sql.NVarChar, email)
+      .query("SELECT UserID FROM Users WHERE Email = @email");
 
     if (checkEmail.recordset.length > 0) {
       return res.status(400).json({
         success: false,
         data: null,
-        message: 'Email này đã được sử dụng',
+        message: "Email này đã được sử dụng",
       });
     }
 
@@ -44,12 +44,11 @@ const register = async (req, res) => {
     // Thêm user mới
     const result = await pool
       .request()
-      .input('fullName', sql.NVarChar, fullName)
-      .input('email', sql.NVarChar, email)
-      .input('phone', sql.NVarChar, phone || null)
-      .input('address', sql.NVarChar, address || null)
-      .input('password', sql.NVarChar, hashedPassword)
-      .query(`
+      .input("fullName", sql.NVarChar, fullName)
+      .input("email", sql.NVarChar, email)
+      .input("phone", sql.NVarChar, phone || null)
+      .input("address", sql.NVarChar, address || null)
+      .input("password", sql.NVarChar, hashedPassword).query(`
         INSERT INTO Users (FullName, Email, Phone, Address, Password)
         OUTPUT INSERTED.UserID, INSERTED.FullName, INSERTED.Email
         VALUES (@fullName, @email, @phone, @address, @password)
@@ -65,7 +64,7 @@ const register = async (req, res) => {
         fullName: user.FullName,
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" },
     );
 
     res.status(201).json({
@@ -76,16 +75,17 @@ const register = async (req, res) => {
           userId: user.UserID,
           fullName: user.FullName,
           email: user.Email,
+          role: "customer",
         },
       },
-      message: 'Đăng ký thành công!',
+      message: "Đăng ký thành công!",
     });
   } catch (error) {
-    console.error('Lỗi register:', error);
+    console.error("Lỗi register:", error);
     res.status(500).json({
       success: false,
       data: null,
-      message: 'Lỗi server khi đăng ký',
+      message: "Lỗi server khi đăng ký",
     });
   }
 };
@@ -98,26 +98,24 @@ const login = async (req, res) => {
       return res.status(400).json({
         success: false,
         data: null,
-        message: 'Vui lòng nhập Email và Mật khẩu',
+        message: "Vui lòng nhập Email và Mật khẩu",
       });
     }
 
     const pool = await getPool();
 
-    const result = await pool
-      .request()
-      .input('email', sql.NVarChar, email)
+    const result = await pool.request().input("email", sql.NVarChar, email)
       .query(`
-        SELECT UserID, FullName, Email, Password, Phone, Address
-        FROM Users
-        WHERE Email = @email
-      `);
+    SELECT UserID, FullName, Email, Password, Phone, Address, Role
+    FROM Users
+    WHERE Email = @email
+  `);
 
     if (result.recordset.length === 0) {
       return res.status(401).json({
         success: false,
         data: null,
-        message: 'Email hoặc mật khẩu không đúng',
+        message: "Email hoặc mật khẩu không đúng",
       });
     }
 
@@ -129,7 +127,7 @@ const login = async (req, res) => {
       return res.status(401).json({
         success: false,
         data: null,
-        message: 'Email hoặc mật khẩu không đúng',
+        message: "Email hoặc mật khẩu không đúng",
       });
     }
 
@@ -139,9 +137,10 @@ const login = async (req, res) => {
         userId: user.UserID,
         email: user.Email,
         fullName: user.FullName,
+        role: user.Role || "customer",
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" },
     );
 
     res.json({
@@ -154,16 +153,17 @@ const login = async (req, res) => {
           email: user.Email,
           phone: user.Phone,
           address: user.Address,
+          role: user.Role || "customer",
         },
       },
-      message: 'Đăng nhập thành công!',
+      message: "Đăng nhập thành công!",
     });
   } catch (error) {
-    console.error('Lỗi login:', error);
+    console.error("Lỗi login:", error);
     res.status(500).json({
       success: false,
       data: null,
-      message: 'Lỗi server khi đăng nhập',
+      message: "Lỗi server khi đăng nhập",
     });
   }
 };
@@ -174,8 +174,7 @@ const getMe = async (req, res) => {
     const pool = await getPool();
     const result = await pool
       .request()
-      .input('userId', sql.Int, req.user.userId)
-      .query(`
+      .input("userId", sql.Int, req.user.userId).query(`
         SELECT UserID, FullName, Email, Phone, Address
         FROM Users
         WHERE UserID = @userId
@@ -185,21 +184,21 @@ const getMe = async (req, res) => {
       return res.status(404).json({
         success: false,
         data: null,
-        message: 'Không tìm thấy người dùng',
+        message: "Không tìm thấy người dùng",
       });
     }
 
     res.json({
       success: true,
       data: result.recordset[0],
-      message: 'Lấy thông tin thành công',
+      message: "Lấy thông tin thành công",
     });
   } catch (error) {
-    console.error('Lỗi getMe:', error);
+    console.error("Lỗi getMe:", error);
     res.status(500).json({
       success: false,
       data: null,
-      message: 'Lỗi server',
+      message: "Lỗi server",
     });
   }
 };

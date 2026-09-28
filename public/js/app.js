@@ -48,18 +48,27 @@ function showPage(name) {
 function updateAuthUI() {
   const authButtons = document.getElementById("authButtons");
   const userInfo = document.getElementById("userInfo");
-  const btnMobile = document.getElementById("btn-mobile");
+  const adminBtn = document.getElementById("adminBtn");
+
   if (currentUser && token) {
     authButtons.className = "hidden sm:hidden gap-2";
     userInfo.classList.remove("hidden");
     userInfo.classList.add("flex");
-    btnMobile.classList.add("hidden");
     document.getElementById("userName").textContent = currentUser.fullName;
+
+    // Chỉ admin mới thấy nút
+    if (adminBtn) {
+      if (currentUser.role === "admin") {
+        adminBtn.classList.remove("hidden");
+      } else {
+        adminBtn.classList.add("hidden");
+      }
+    }
   } else {
     authButtons.className = "hidden sm:flex items-center gap-2";
     userInfo.classList.add("hidden");
     userInfo.classList.remove("flex");
-    btnMobile.classList.remove("hidden");
+    if (adminBtn) adminBtn.classList.add("hidden");
   }
 }
 
